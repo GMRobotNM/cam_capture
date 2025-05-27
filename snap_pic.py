@@ -1,24 +1,23 @@
 import streamlit as st
-from ultralytics import YOLO
+import torch
 from PIL import Image
 import numpy as np
 
-st.title("📸 YOLOv5 Detection using st.camera_input")
+st.title("📸 YOLOv5 Detection with Camera Input")
 
-# Take a photo from webcam (browser-supported)
+# Camera input
 img_file = st.camera_input("Take a picture")
 
-if img_file:
-    # Load YOLOv5 model (first time will download weights)
-    model = YOLO("yolov5s.pt")  # You can also use yolov8s.pt
+if img_file is not None:
+    # Load YOLOv5 model
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
 
-    # Load image from camera input
+    # Convert image to format suitable for model
     img = Image.open(img_file)
     img_np = np.array(img)
 
-    # Run inference
+    # Inference
     results = model(img_np)
+    results.render()  # Draw boxes on image
 
-    # Plot results
-    result_img = results[0].plot()
-    st.image(result_img, caption="Detected Objects", use_column_width=True)
+    st.image(results.ims[0], caption="Detected objects", use_column_width=True)
